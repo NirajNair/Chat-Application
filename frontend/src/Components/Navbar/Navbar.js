@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { GiTigerHead } from "react-icons/gi";
+import React, {useState } from "react";
 import { FiLogOut, FiUser } from "react-icons/fi";
-import { CgProfile, CgChevronDown, CgMenu, CgOptions } from "react-icons/cg";
+import { CgMenu} from "react-icons/cg";
 import { UserState } from "../../Contexts/UserContext";
 import axios from "axios";
-import Alert from "../Alerts/Alert";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
 import logo from "../../static/logo192.png";
 
 export default function Navbar(props) {
@@ -15,38 +12,14 @@ export default function Navbar(props) {
  
     const navigate = useNavigate();
 
-    function handleChange(event) {
-        event.preventDefault();
-        setUserEmail(event.target.value);
-    }
-
-    function handleClick(event, name) {
-        event.preventDefault();
-        console.log(name);
-        switch (name.toLowerCase()) {
-            case "logout":
-                console.log("logoutjk");
-                handleLogout();
-                break;
-            case "profile":
-                console.log(name);
-                break;
-            default:
-        }
-    }
-
-    function handleKeyDown(event) {
-        if (event.key === "Enter") {
-            handleFriendSearch(event);
-        }
-    }
+    const {setChatList} = UserState();
 
     async function handleLogout() {
         try {
             setUserEmail("");
             await axios
                 .get(
-                    "http://localhost:5000/api/user/logout",
+                    `${process.env.REACT_APP_URL}/api/user/logout`,
                     { withCredentials: true },
                     {
                         "Content-type": "application/json",
@@ -54,43 +27,9 @@ export default function Navbar(props) {
                 )
                 .then((res) => {
                     console.log(res);
+                    setChatList();
                 });
             navigate("/login");
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    async function handleFriendSearch(event) {
-        try {
-            event.preventDefault();
-            console.log(userEmail);
-            await axios
-                .post(
-                    "http://localhost:5000/api/chat/addfriend",
-                    { email: userEmail },
-                    { withCredentials: true },
-                    {
-                        "Conetent-type": "application/json",
-                    }
-                )
-                .then((res) => {
-                    toast.dismiss();
-                    toast.success(res.data.msg, {
-                        duration: 3000,
-                        position: "top-center",
-                    });
-
-                    props.handleRender();
-                })
-                .catch((error) => {
-                    console.log(error.response.data.msg);
-                    toast.dismiss();
-                    toast.error(error.response.data.msg, {
-                        duration: 3000,
-                        position: "top-center",
-                    });
-                });
         } catch (err) {
             console.log(err);
         }

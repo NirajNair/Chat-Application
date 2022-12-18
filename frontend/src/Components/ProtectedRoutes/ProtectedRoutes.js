@@ -9,7 +9,7 @@ export default function ProtectedRoutes() {
 
     async function getUser() {
         await axios.get(
-            "http://localhost:5000/api/user/",
+            `${process.env.REACT_APP_URL}/api/user/`,
             { withCredentials: true },
             {
                 "Content-type": "application/json",

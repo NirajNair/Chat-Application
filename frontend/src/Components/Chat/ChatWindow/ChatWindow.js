@@ -1,27 +1,22 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { MdSend, MdOutlineArrowBack, MdDeleteOutline } from "react-icons/md";
 import { RiInformationLine } from "react-icons/ri";
-import axios, { AxiosHeaders } from "axios";
+import axios from "axios";
 import { UserState } from "../../../Contexts/UserContext";
 import { io } from "socket.io-client";
 import EditGroupModal from "../GroupModal/EditGroupModal";
-import ChatsList from "../ChatsList/ChatsList";
 
-const ENDPOINT = "http://localhost:5000";
 let socket, selectedChatCompare;
 
 function Time(props) {
     const [time, setTime] = useState("");
 
     useLayoutEffect(() => {
-        let [hour, minute] = props.date.split("T")[1].split(':'); 
+        let [hour, minute] = props.date.split("T")[1].split(":");
         setTime(hour + ":" + minute);
-    }, [])
+    }, []);
 
-    return (
-        <span className="font-light text-gray-500">{time}</span>
-    );
-
+    return <span className="font-light text-gray-500">{time}</span>;
 }
 
 export default function ChatWindow(props) {
@@ -46,7 +41,7 @@ export default function ChatWindow(props) {
         // getAllChatMessages();
         // setAllChatMessagesCopy(allChatMessages.reverse());
         selectedChatCompare = selectedChat;
-        socket = io(ENDPOINT);
+        socket = io(process.env.REACT_APP_URL);
         socket.emit("setup", user);
         socket.on("connection", () => setSocketConnected(true));
     }, []);
@@ -94,7 +89,7 @@ export default function ChatWindow(props) {
             };
             await axios
                 .post(
-                    "http://localhost:5000/api/message/send/",
+                    `${process.env.REACT_APP_URL}/api/message/send/`,
                     { messageBody: messageBody },
                     { withCredentials: true },
                     {
@@ -124,7 +119,9 @@ export default function ChatWindow(props) {
         console.log("entered");
         await axios
             .get(
-                `http://localhost:5000/api/message/deletechat/${selectedChat._id.toString()}`,
+                `${
+                    process.env.REACT_APP_URL
+                }/api/message/deletechat/${selectedChat._id.toString()}`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
@@ -150,7 +147,7 @@ export default function ChatWindow(props) {
         if (selectedChat) {
             await axios
                 .get(
-                    `http://localhost:5000/api/message/${selectedChat._id}`,
+                    `${process.env.REACT_APP_URL}/api/message/${selectedChat._id}`,
                     { withCredentials: true },
                     {
                         "Content-type": "application/json",
@@ -259,12 +256,34 @@ export default function ChatWindow(props) {
                     </div>
                 </div>
             </div>
-                <div className="flex flex-col-reverse relative overflow-y-scroll scrollbar-hide flex-grow h-96">
-                    {allChatMessages &&
-                        allChatMessages.map((message, index, arr) => { 
-                            let [year, month, day] = message.createdAt.toString().split('T')[0].split('-');
-                            return(
+            <div className="flex flex-col-reverse relative overflow-y-scroll scrollbar-hide flex-grow h-96">
+                {allChatMessages &&
+                    allChatMessages.map((message, index, arr) => {
+                        console.log(index);
+                        let [year, month, day] = message.createdAt
+                            .toString()
+                            .split("T")[0]
+                            .split("-");
+                        return (
                             <div className="flex flex-col">
+                                <div className="inline-flex justify-center text-black font-medium font-semibold text-sm py-1">
+                                    {index === allChatMessages.length - 1 ? (
+                                        <span>
+                                            {day + "/" + month + "/" + year}
+                                        </span>
+                                    ) : (
+                                        <span>
+                                            {index + 1 < allChatMessages.length-1 &&
+                                                arr[index + 1].createdAt
+                                                    .toString()
+                                                    .split("T")[0] !==
+                                                    message.createdAt
+                                                        .toString()
+                                                        .split("T")[0] &&
+                                                day + "/" + month + "/" + year}
+                                        </span>
+                                    )}
+                                </div>
                                 <div
                                     className={
                                         "w-full flex   " +
@@ -274,21 +293,23 @@ export default function ChatWindow(props) {
                                             : "justify-start")
                                     }
                                 >
-                                    {/* <div className="flex flex-col "> */}
                                     <div
                                         className="px-2 flex flex-col max-w-md"
                                         key={message._id}
                                     >
-                                        {selectedChat.groupChat && message.sender._id.toString() !==
-                                            user._id.toString() && (
-                                            <div className="pl-1">
-                                                <p className="text-black font-normal">
-                                                    {message.sender.firstName +
-                                                        " " +
-                                                        message.sender.lastName}
-                                                </p>
-                                            </div>
-                                        )}
+                                        {selectedChat.groupChat &&
+                                            message.sender._id.toString() !==
+                                                user._id.toString() && (
+                                                <div className="pl-1">
+                                                    <p className="text-black font-normal">
+                                                        {message.sender
+                                                            .firstName +
+                                                            " " +
+                                                            message.sender
+                                                                .lastName}
+                                                    </p>
+                                                </div>
+                                            )}
                                         <div
                                             className={
                                                 "flex " +
@@ -300,7 +321,8 @@ export default function ChatWindow(props) {
                                             <div
                                                 className={
                                                     "py-2 px-5 rounded-3xl h-fit  flex " +
-                                                    (message.sender._id === user._id
+                                                    (message.sender._id ===
+                                                    user._id
                                                         ? "bg-blue-500 text-white flex rounded-tr-none"
                                                         : "bg-slate-300 text-black rounded-tl-none ")
                                                 }
@@ -310,25 +332,24 @@ export default function ChatWindow(props) {
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="text-xs font-light flex justify-end px-2">
-                                            <Time date={message.createdAt} />
+                                        <div className={(message.sender._id ===
+                                                    user._id
+                                                        ? ""
+                                                        : "w-fit")}>
+                                            <div
+                                                className="text-xs font-light flex justify-end px-2"
+                                            >
+                                                <Time
+                                                    date={message.createdAt}
+                                                />
+                                            </div>
                                         </div>
-                                        {/* </div> */}
                                     </div>
                                 </div>
-                                
-                                {/* <div class="inline-flex justify-center items-center w-full">
-                                    <span class="absolute left-1/2 px-3 font-medium text-gray-900 bg-white -translate-x-1/2 dark:text-white dark:bg-gray-900">or</span>
-                                </div>  */}
-                                <div className="inline-flex justify-center text-black font-medium text-sm py-1">
-                                    {/* <hr class="my-8 w-64 h-px bg-gray-200 border-0 dark:bg-gray-700" /> */}
-                                    {(index === allChatMessages.length-1) ? <span>{day+"/"+month+"/"+year   }</span> :
-                                    <span>{index-1 > 0 &&  arr[index-1].createdAt.toString().split('T')[0] !== message.createdAt.toString().split('T')[0] && day+"/"+month+"/"+year}</span> }
-                                </div>
-
-                            </div>    
-                        ) })}
-                </div>
+                            </div>
+                        );
+                    })}
+            </div>
 
             {selectedChat && (
                 <div className="bottom-0 inset-x-0 ">

@@ -120,7 +120,7 @@ export default function GroupModal(props) {
             console.log(group);
             await axios
                 .post(
-                    "http://localhost:5000/api/chat/creategroup",
+                    `${process.env.REACT_APP_URL}/api/chat/creategroup`,
                     group,
                     { withCredentials: true },
                     {
