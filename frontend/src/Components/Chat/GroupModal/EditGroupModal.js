@@ -27,7 +27,7 @@ export default function EditGroupModal(props) {
     async function getFriendList() {
         await axios
             .get(
-                `http://localhost:5000/api/chat/friendList`,
+                `${process.env.REACT_APP_URL}/api/chat/friendList`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
@@ -121,7 +121,7 @@ export default function EditGroupModal(props) {
         let chat = selectedChat;
         await axios
             .post(
-                "http://localhost:5000/api/chat/deletegroup",
+                `${process.env.REACT_APP_URL}/api/chat/deletegroup`,
                 {chat},
                 { withCredentials: true },
                 {
@@ -149,7 +149,7 @@ export default function EditGroupModal(props) {
         userDetail["userId"] = user._id;
         await axios
             .post(
-                "http://localhost:5000/api/chat/leavegroup",
+                `${process.env.REACT_APP_URL}/api/chat/leavegroup`,
                 { userDetail },
                 { withCredentials: true },
                 {
@@ -185,7 +185,7 @@ export default function EditGroupModal(props) {
             group["users"] = userIdList;
             await axios
                 .post(
-                    "http://localhost:5000/api/chat/updategroup",
+                    `${process.env.REACT_APP_URL}/api/chat/updategroup`,
                     { group },
                     { withCredentials: true },
                     {

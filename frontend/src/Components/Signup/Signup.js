@@ -59,7 +59,7 @@ export default function Signup() {
             try {
                 await axios
                     .post(
-                        "http://localhost:5000/api/user/signup",
+                        `${process.env.REACT_APP_URL}/api/user/signup`,
                         formData ,
                         { withCredentials: true },
                         {   
@@ -173,7 +173,7 @@ export default function Signup() {
                                 required
                                 onChange={(e) => handleFormChange(e)}
                             />
-                            <div className="text-2xl absolute top-10 right-3">
+                            <div className="text-2xl absolute top-9 right-3">
                                 {showPass === false ? (
                                     <AiOutlineEye
                                         onClick={(e) => toggleShowPass(e)}
@@ -205,7 +205,7 @@ export default function Signup() {
                                 required
                                 onChange={(e) => handleFormChange(e)}
                             />
-                            <div className="text-2xl absolute top-10 right-3">
+                            <div className="text-2xl absolute top-9 right-3">
                                 {showConfirmPass === false ? (
                                     <AiOutlineEye
                                         onClick={(e) =>

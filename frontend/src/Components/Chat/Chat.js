@@ -4,14 +4,12 @@ import axios from "axios";
 import { UserState } from "../../Contexts/UserContext";
 import Navbar from "../Navbar/Navbar";
 import ChatsList from "./ChatsList/ChatsList";
-
 import GroupModal from "./GroupModal/GroupModal";
 import ChatWindow from "./ChatWindow/ChatWindow";
 import AddUserModal from "./AddUserModal/AddUserModal";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Chat() {
-    const navigate = useNavigate();
     const [searchResult, setSearchResult] = useState([]);
     const [searchFriend, setSearchFriend] = useState("");
     const [searchOnFocus, setSearchOnFocus] = useState(false);
@@ -26,15 +24,21 @@ export default function Chat() {
 
     useEffect(() => {
         function handleResize() {
-            console.log(window.innerWidth);
             setWidth(window.innerWidth);
         }
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, [width]);
 
-    const { user, friendList, selectedChat, setSelectedChat, setFriendList, chatList, setChatList } =
-        UserState();
+    const {
+        user,
+        friendList,
+        selectedChat,
+        setSelectedChat,
+        setFriendList,
+        chatList,
+        setChatList,
+    } = UserState();
 
     function handleSearchFriend(friend) {
         setSearchFriend(friend);
@@ -59,7 +63,7 @@ export default function Chat() {
     async function getFriendList() {
         await axios
             .get(
-                `http://localhost:5000/api/chat/friendList`,
+                `${process.env.REACT_APP_URL}/api/chat/friendList`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
@@ -74,11 +78,9 @@ export default function Chat() {
     function searchUsers() {
         clearTimeout(timer);
         let searchParam = searchFriend;
-        console.log(searchParam);
         if (searchParam === "") {
             setSearchResult(friendList);
         } else {
-            // const newTimer = setTimeout(() => {
             let regexExp = new RegExp(`${searchParam}*`);
             let matches = friendList.filter((friend) => {
                 return regexExp.test(
@@ -87,39 +89,12 @@ export default function Chat() {
                 );
             });
             setSearchResult(matches);
-            // }, 100);
-            // setTimer(newTimer);
         }
     }
 
     useEffect(() => {
         searchUsers();
-        console.log(searchResult);
     }, [searchFriend]);
-
-    function getUsers(friend) {
-        try {
-            if (friend === "") {
-                setSearchResult([]);
-                setSearchOnFocus(false);
-            } else {
-                axios
-                    .get(
-                        `http://localhost:5000/api/chat/friend?search=${friend}`,
-                        { withCredentials: true },
-                        {
-                            "Content-type": "application/json",
-                        }
-                    )
-                    .then((res) => {
-                        console.log(res.data);
-                        setSearchResult(res.data);
-                    });
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
 
     async function handleAddUser(event, userEmail) {
         try {
@@ -127,7 +102,7 @@ export default function Chat() {
             console.log(userEmail);
             await axios
                 .post(
-                    "http://localhost:5000/api/chat/addfriend",
+                    `${process.env.REACT_APP_URL}/api/chat/addfriend`,
                     { email: userEmail },
                     { withCredentials: true },
                     {
@@ -155,7 +130,11 @@ export default function Chat() {
                     });
                 });
         } catch (err) {
-            console.log(err);
+            toast.dismiss();
+            toast.error(err, {
+                duration: 3000,
+                position: "top-center",
+            });
         }
     }
 
@@ -272,7 +251,10 @@ export default function Chat() {
                 <GroupModal handleShowGroupModal={handleShowGroupModal} />
             )}
             {showAddUserModal && (
-                <AddUserModal handleShowAddUserModal={handleShowAddUserModal} handleAddUser={handleAddUser} />
+                <AddUserModal
+                    handleShowAddUserModal={handleShowAddUserModal}
+                    handleAddUser={handleAddUser}
+                />
             )}
         </div>
     );

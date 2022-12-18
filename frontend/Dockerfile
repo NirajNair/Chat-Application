@@ -6,10 +6,10 @@ COPY package.json /app/frontend/
 
 RUN npm install
 
-COPY . /app/frontend/
+COPY build /app/frontend/
 
-RUN npm install
+ENV API_URL=http://localhost:5000
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["serve", "-l", "3000", "-s", "build"]

@@ -77,7 +77,7 @@ export default function Signup() {
             if(pic && user.firstName !== formValue.firstName && user.lastName !== formValue.lastName) {
                 await axios
                     .post(
-                        "http://localhost:5000/api/user/updateuser",
+                        `${process.env.REACT_APP_URL}/api/user/updateuser`,
                         formData,
                         { withCredentials: true },
                         {
@@ -89,7 +89,6 @@ export default function Signup() {
                         if (res.status === 200) {
                             console.log(res.data.user, user);
                             setUser(res.data.user);
-                            // setPic();
                         }
                     });
             }

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useQuery } from "react-query";
-import { CgProfile, CgClose } from "react-icons/cg";
+import { CgClose } from "react-icons/cg";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { UserState } from "../../../Contexts/UserContext";
@@ -8,20 +7,16 @@ import ChatsListLoading from "./ChatsListLoading";
 import { MdGroupAdd, MdPersonAdd } from "react-icons/md";
 
 export default function ChatsList(props) {
-    const [friendName, setFriendName] = useState("");
-    const [isLoading, setIsLoading] = useState("false");
     const [searchList, setSearchList] = useState();
     const [search, setSearch] = useState("");
-    const [searchFocus, setSearchFocus] = useState(false);
     const [timer, setTimer] = useState(null);
 
-    const { user, chatList, setChatList, selectedChat, setSelectedChat } =
+    const { user, chatList, setChatList, setSelectedChat } =
         UserState();
 
     async function getChatList() {
         try {
-            // console.log(user);
-            const { data } = await axios.get("http://localhost:5000/api/chat", {
+            const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/chat`, {
                 withCredentials: true,
             });
             console.log(data);
@@ -36,7 +31,6 @@ export default function ChatsList(props) {
         event.preventDefault();
         setSearch(event.target.value);
         if (event.target.value === "") {
-            setSearchFocus(false);
             setSearchList(chatList);
         } else {
             clearTimeout(timer);
@@ -63,14 +57,13 @@ export default function ChatsList(props) {
             }, 100);
             setTimer(newTimer);
             // console.log(search);
-            setSearchFocus(true);
-        }
+         }
     }
 
     function handleClearSearch(event) {
         event.preventDefault();
         setSearch("");
-        setSearchFocus(false);
+
         setSearchList(chatList);
     }
 
