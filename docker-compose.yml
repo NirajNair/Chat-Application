@@ -1,0 +1,48 @@
+version: "3"
+services:
+  react:
+    image: chatapp-frontend-image
+    stdin_open: true
+    ports:
+      - "3000:3000"
+    networks:
+      - frontend
+    depends_on:
+      - server
+    
+  server:
+    image: chatapp-server-image
+    ports:
+      - "5000:5000"
+    networks:
+      - backend
+      - frontend
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    networks:
+      - backend
+    volumes:
+      - mongo-data:/data/db
+  
+  redis:
+      image: 'redis'
+      ports:
+        - "6379:6379"
+      networks:
+        - backend
+
+networks:
+  frontend:
+    driver: bridge
+  
+  backend:
+    driver: bridge
+  
+volumes:
+  mongo-data:
+    driver: local
