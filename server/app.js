@@ -21,7 +21,7 @@ const app = express();
 const httpServer = createServer(app);
 const port = process.env.PORT;
 //url: 'redis://redis:6379'
-const client = redis.createClient({legacyMode: true, });
+const client = redis.createClient({legacyMode: true, url: 'redis://redis:6379'});
 
 connectMongoose();
 

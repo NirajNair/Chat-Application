@@ -22,7 +22,6 @@ let encryptPassword = (password, key) => {
 // save user to database
 
 async function addUserToDB(req, res, newUserObj) {
-    console.log(newUserObj);
     const newUser = User(newUserObj);
     await newUser
         .save()
@@ -33,7 +32,6 @@ async function addUserToDB(req, res, newUserObj) {
 // registers the user
 userRouter.post("/signup", upload.single("pic"), async (req, res) => {
     try {
-        console.log(req.body, req.file);
         const { firstName, lastName, email, password, confirmPassword } =
             req.body;
         if (firstName && lastName && email && password && confirmPassword) {
@@ -48,7 +46,6 @@ userRouter.post("/signup", upload.single("pic"), async (req, res) => {
                     });
                 } else {
                     if (!validator.isStrongPassword(password)) {
-                        console.log("not strong pass");
                         res.status(400).json({
                             message:
                                 "Please use password of length 8 with minimum 1 Capital Letter, 1 Number and 1 Special Character and ",
@@ -72,17 +69,13 @@ userRouter.post("/signup", upload.single("pic"), async (req, res) => {
                             };
 
                             if (req.file) {
-                                console.log(req.file.path);
-
                                 await cloudinary.uploader
                                     .upload(req.file.path)
                                     .then((result) => {
-                                        console.log(result);
                                         newUserObj["pic"] = result.url;
                                         newUserObj["picId"] = result.public_id;
                                         fs.unlinkSync(req.file.path);
                                         const newUser = User(newUserObj);
-                                        console.log(newUser);
                                         newUser
                                             .save()
                                             .then(() => {
@@ -115,13 +108,11 @@ userRouter.post("/signup", upload.single("pic"), async (req, res) => {
 userRouter.post("/login", async (req, res) => {
     try {
         const { email, password, remember } = req.body.formValue;
-        console.log(email, password, remember);
         if (email || password) {
             const encryptedPassword = encryptPassword(
                 password,
                 process.env.SECRET
             );
-            console.log(encryptedPassword);
 
             if (validator.isEmail(email)) {
                 const user = await User.findOne({
@@ -130,7 +121,6 @@ userRouter.post("/login", async (req, res) => {
                 });
                 if (user) {
                     req.session.user = user;
-                    console.log(req.session);
                     res.status(200).json({
                         message: "Log In successful",
                         user: user,
@@ -160,7 +150,6 @@ userRouter.get("/logout", authenticate, (req, res) => {
     // console.log("redis session id: ",req.sessionID);
     req.session.destroy((err) => {
         if (err) {
-            console.log("redis error");
             console.log(err);
         } else {
             res.clearCookie("_sessionId");
@@ -193,16 +182,12 @@ userRouter.post(
             updatedUserObj["picId"] = picId;
 
             if (req.file) {
-                console.log("current id: ", req.session.user.picId);
                 await cloudinary.uploader.destroy(req.session.user.picId);
                 await cloudinary.uploader.upload(req.file.path);
-                console.log("uploaded pic ", uploadedPic);
                 updatedUserObj["pic"] = uploadedPic.url;
                 updatedUserObj["picId"] = uploadedPic.public_id;
-                console.log("new id: ", uploadedPic.public_id);
                 fs.unlinkSync(req.file.path);
             }
-            console.log("user obj", updatedUserObj);
             if (updatedUserObj) {
                 const updatedUser = await User.findOneAndUpdate(
                     { _id: req.session.user._id },
@@ -211,7 +196,6 @@ userRouter.post(
                 if (!updatedUser) {
                     res.status(404).send("User not found");
                 } else {
-                    console.log(updatedUser);
                     req.session.user = updatedUser;
                     res.status(200).json({ user: updatedUser });
                 }
@@ -224,7 +208,6 @@ userRouter.post(
 
 userRouter.post("/changepassword", authenticate, async (req, res) => {
     try {
-        console.log(req.body);
         const { oldPassword, newPassword, confirmNewPassword } = req.body;
         if (oldPassword === newPassword) {
             res.status(400).json({
