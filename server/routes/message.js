@@ -56,7 +56,6 @@ messageRouter.get("/deletechat/:chatId", authenticate, async (req, res) => {
     try {
         await Message.deleteMany({ chat: req.params.chatId });
         res.status(200).send({msg: "Could not delete Chats."});
-        console.log("entered dlete")        
     } catch(err) {
         res.status(400).send({msg: "Could not delete Chats."});
         console.log(err);

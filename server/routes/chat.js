@@ -33,7 +33,6 @@ chatRouter.get("/friendList", authenticate, async (req, res) => {
 chatRouter.get("/friend", authenticate, async (req, res) => {
     try {
         const friendKeyword = req.query.search;
-        console.log("search param: ", friendKeyword);
         if (friendKeyword == "") {
             res.status(200).send([]);
         } else {
@@ -64,7 +63,6 @@ chatRouter.get("/friend", authenticate, async (req, res) => {
                     ],
                 }).exec(function (err, result) {
                     if (err) return res.status(401).send({ msg: err });
-                    console.log(result);
                     res.status(200).send(result);
                 });
             });
@@ -79,7 +77,6 @@ async function checkChatExists(userIds) {
     const chat = await Chat.findOne({
         users: userIds,
     });
-    console.log("Chat exists: ", chat);
     if (chat) {
         return true;
     }
@@ -89,11 +86,9 @@ async function checkChatExists(userIds) {
 // add friend
 chatRouter.post("/addfriend", authenticate, async (req, res) => {
     try {
-        console.log(req.body);
         const user = await User.findOne({
             email: req.body.email.toLowerCase(),
         });
-        console.log(user);
         if (user) {
             let userIds = [req.session.user._id, user._id];
             // console.log(userIds, await checkChatExists(userIds));
@@ -156,7 +151,6 @@ chatRouter.post(
     authenticate,
     upload.single("pic"),
     async (req, res) => {
-        console.log(req.body);
         const { groupName, users } = req.body;
         // users.push(req.session.user._id);
         try {
@@ -176,7 +170,6 @@ chatRouter.post(
                     newGroupChatData["groupPicId"] = result.public_id;
                     fs.unlinkSync(req.file.path);
                 });
-                console.log(newGroupChatData);
                 const newGroupChat = await Chat.create(newGroupChatData);
 
                 const populatedNewGroupChat = await Chat.findOne({
@@ -185,7 +178,6 @@ chatRouter.post(
                     .populate("users", "-password")
                     .populate("groupAdmin", "-password")
                     .populate("lastMessage");
-                console.log(populatedNewGroupChat);
                 res.status(200).send(populatedNewGroupChat);
             }
         } catch (err) {
@@ -198,8 +190,6 @@ chatRouter.post(
 // updates group detail
 chatRouter.post("/updategroup", authenticate, async (req, res) => {
     const { chatId, chatName, users } = req.body.group;
-    console.log(req.body);
-    console.log(chatId, "update");
 
     const updatedChat = await Chat.updateOne(
         { _id: chatId },
@@ -210,7 +200,6 @@ chatRouter.post("/updategroup", authenticate, async (req, res) => {
             },
         }
     );
-    console.log(updatedChat);
     if (!updatedChat) {
         res.status(404).send("Chat not found");
     } else {
