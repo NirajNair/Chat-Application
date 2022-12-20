@@ -7,7 +7,7 @@ import { UserState } from "../../Contexts/UserContext";
 import Navbar from "../Navbar/Navbar";
 import toast, { Toaster } from "react-hot-toast";
 
-export default function Signup() {
+export default function Profile() {
     const [showOldPass, setShowOldPass] = useState(false);
     const [showNewPass, setShowNewPass] = useState(false);
     const [showConfirmNewPass, setShowConfirmNewPass] = useState(false);
@@ -29,7 +29,6 @@ export default function Signup() {
     const [pic, setPic] = useState();
     
     function handlePicUpload(event) {
-        console.log(event);
         setPic(event);
     }
     useEffect(() => {
@@ -39,7 +38,6 @@ export default function Signup() {
             email: user.email,
         };
         setFormValue(userDet);
-        console.log(user);
     }, []);
     
     function handleFormChange(event) {
@@ -68,13 +66,12 @@ export default function Signup() {
         let formData = new FormData();
         formData.append("firstName", formValue.firstName);
         formData.append("lastName", formValue.lastName);
-        formData.append("pic", formValue.pic);
-        formData.append("picId", formValue.picId);
         if(pic) {
+            console.log("pic")
             formData.append("pic", pic);
         }
         try {
-            if(pic && user.firstName !== formValue.firstName && user.lastName !== formValue.lastName) {
+            if(pic || user.firstName !== formValue.firstName || user.lastName !== formValue.lastName) {
                 await axios
                     .post(
                         `${process.env.REACT_APP_URL}/api/user/updateuser`,
@@ -85,15 +82,14 @@ export default function Signup() {
                         }
                     )
                     .then((res) => {
-                        console.log(res);
                         if (res.status === 200) {
-                            console.log(res.data.user, user);
+                            console.log(res.data.user);
                             setUser(res.data.user);
                         }
                     });
             }
         } catch (error) {
-            setErrorMessage(error.response.data.message);
+            setErrorMessage(error);
         }
     }
 
@@ -103,7 +99,6 @@ export default function Signup() {
         formData["oldPassword"] = formValue.oldPassword;
         formData["newPassword"] = formValue.newPassword;
         formData["confirmNewPassword"] = formValue.confirmNewPassword;
-        console.log(formData);
         try {
             await axios
                 .post(

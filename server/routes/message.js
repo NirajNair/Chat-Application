@@ -40,11 +40,8 @@ messageRouter.post("/send", authenticate, async (req, res) => {
 messageRouter.get("/:chatId", authenticate, async (req, res) => {
     try {
         const messages = await Message.find({chat: req.params.chatId})
-        // .sort({createdAt: -1})
         .populate("sender", "firstName lastName pic email");
-        
         res.status(200).send(messages);
-
     } catch(err) {
         res.status(400).send({msg: "Could not fetch all chat."});
         console.log(err);

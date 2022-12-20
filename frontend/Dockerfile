@@ -9,8 +9,6 @@ RUN npm install -g serve
 
 COPY . /app/frontend/
 
-ENV API_URL=http://localhost:5000
-
 EXPOSE 3000
 
 RUN npm run build

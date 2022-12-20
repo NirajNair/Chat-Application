@@ -10,7 +10,6 @@ export default function GroupModal(props) {
     const [selectedMemberMap, setSelectedMemberMap] = useState(new Map());
     const [searchGroupMembers, setSearchGroupMembers] = useState("");
     const [groupName, setGroupName] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
     const [timer, setTimer] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -19,21 +18,19 @@ export default function GroupModal(props) {
     const [pic, setPic] = useState();
 
     function handlePicUpload(event) {
-        console.log(event);
         setPic(event);
     }
 
     async function getFriendList() {
         await axios
             .get(
-                `http://localhost:5000/api/chat/friendList`,
+                `${process.env.REACT_APP_URL}/api/chat/friendList`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
                 }
             )
             .then((res) => {
-                console.log(res.data);
                 setFriendList(res.data);
             });
     }
@@ -44,18 +41,6 @@ export default function GroupModal(props) {
         }
         setSearchMatches(friendList);
     }, []);
-
-    useEffect(() => {
-        console.log("entered");
-    });
-
-    // function filterValues(chat) {
-    //     let name =
-    //         chat.users[0]._id !== user._id
-    //             ? chat.users[0].firstName + " " + chat.users[0].lastName
-    //             : chat.users[1].firstName + " " + chat.users[1].lastName;
-    //     return name.includes(niraj);
-    // }
 
     function handleChange(event) {
         event.preventDefault();
@@ -99,7 +84,6 @@ export default function GroupModal(props) {
         }
         setGroupMembers(groupMembers);
         setSelectedMemberMap(localMemberMap);
-        // console.log(localMemberMap, groupMembers);
     }
 
     async function handleCreateGroup(event) {
@@ -109,18 +93,19 @@ export default function GroupModal(props) {
         } else if (groupMembers.length === 0) {
             setErrorMessage("Please add group members.");
         } else {
+            console.log("creating group")
             let group = new FormData();
             let userIdList = [];
             userIdList.push(user._id);
             groupMembers.map((member) => userIdList.push(member));
-            console.log(groupMembers);
             group.append("groupName", groupName);
             group.append("users", userIdList);
-            group.append("pic", pic);
-            console.log(group);
+            if(pic) {
+                group.append("pic", pic);
+            }
             await axios
-                .post(
-                    `${process.env.REACT_APP_URL}/api/chat/creategroup`,
+            .post(
+                `${process.env.REACT_APP_URL}/api/chat/creategroup`,
                     group,
                     { withCredentials: true },
                     {
@@ -128,15 +113,13 @@ export default function GroupModal(props) {
                     }
                 )
                 .then((res) => {
-                    // console.log(res.data);
-                    let updatedChatList = chatList.unshift(res.data);
-                    setChatList([...updatedChatList]);
+                    chatList.unshift(res.data);
+                    setChatList(chatList);
+                    props.handleShowGroupModal(false);
                 })
                 .catch((err) => {
                     setErrorMessage(err);
                 });
-            // console.log(chatList);
-            props.handleShowGroupModal(false);
         }
     }
 

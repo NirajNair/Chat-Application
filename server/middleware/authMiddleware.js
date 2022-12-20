@@ -1,16 +1,14 @@
 const authenticate = async(req, res, next) => {
     try{
-        if(req.sessionID !== req.cookies["_sessionId"].replace("s:", "").split(".")[0]) {
+        if(!req.cookies["_sessionId"] || req.sessionID !== req.cookies["_sessionId"].replace("s:", "").split(".")[0]) {
             let err = "User not authenticated.";
-            res.status(401).send({msg: err});
+            res.status(401).send({msg: "No user authenticated."});
         } else {
-            console.log("user authenticated");
             next();
         }
     } catch(e) {
         console.log(e);
     }
-    // console.log(req.sessionID, req.cookies["_sessionId"].replace("s:", "").split(".")[0]);
 };
 
 module.exports = { authenticate };
