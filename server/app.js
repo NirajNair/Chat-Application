@@ -37,7 +37,7 @@ client.on('connect', () => {
 const io = require("socket.io")(httpServer, {
     pingTimeout: 60000,
     cors: {
-        origin: "http://localhost:3000",
+        origin: `${process.env.CLIENT_URL}:3000`,
 
     }
 });
@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
 
 app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: `${process.env.CLIENT_URL}:3000`,
       methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
       credentials: true,
     })
@@ -78,20 +78,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser()); // for application/x-www-form-urlencoded
 
-// app.use(session({
-//     secret: 'ssshhhhh',
-//     store: new redisStore({ host: 'localhost', port: 6379, client: client,ttl :  260}),
-//     saveUninitialized: false,
-//     resave: false
-// }));
-
 app.use(
     session({
         genid: (req) => {
             return uuid();
         },
         store: new redisStore({
-            host: "localhost",
+            host: process.env.CLIENT_URL,
             port: 6379,
             client: client,
             ttl: 260,
