@@ -59,7 +59,7 @@ userRouter.post("/signup", upload.single("pic"), async (req, res) => {
                                 process.env.SECRET
                             );
 
-                            const newUserObj = {
+                            let newUserObj = {
                                 email: email,
                                 password: encryptedPassword,
                                 firstName: firstName,
@@ -67,28 +67,23 @@ userRouter.post("/signup", upload.single("pic"), async (req, res) => {
                             };
 
                             if (req.file) {
-                                await cloudinary.uploader
-                                    .upload(req.file.path)
-                                    .then((result) => {
-                                        newUserObj["pic"] = result.url;
-                                        newUserObj["picId"] = result.public_id;
-                                        fs.unlinkSync(req.file.path);
-                                        const newUser = User(newUserObj);
-                                        newUser
-                                            .save()
-                                            .then(() => {
-                                                console.log("success");
-                                                res.status(200).json({
-                                                    message: "User Created!",
-                                                });
-                                            })
-                                            .catch((err) =>
-                                                res
-                                                    .status(400)
-                                                    .json({ message: err })
-                                            );
-                                    });
+                                let result = await cloudinary.uploader
+                                    .upload(req.file.path);
+                                newUserObj["pic"] = result.url;
+                                newUserObj["picId"] = result.public_id;
+                                fs.unlinkSync(req.file.path);
                             }
+                            const newUser = User(newUserObj);
+                            newUser
+                                .save()
+                                .then(() => {
+                                    res.status(200).json({
+                                        message: "User Created!",
+                                    });
+                                })
+                                .catch((err) =>
+                                    res.status(400).json({ message: err })
+                                );
                         }
                     }
                 }
@@ -119,6 +114,7 @@ userRouter.post("/login", async (req, res) => {
                 });
                 if (user) {
                     req.session.user = user;
+                    console.log(user);
                     res.status(200).json({
                         message: "Log In successful",
                         user: user,
@@ -170,18 +166,23 @@ userRouter.post(
     upload.single("pic"),
     async (req, res) => {
         try {
-            const { firstName, lastName} = req.body;
+            const { firstName, lastName } = req.body;
             let updatedUserObj = {};
-            if(firstName !== req.session.user.firstName || lastName !== req.session.user.lastName) {
+            if (
+                firstName !== req.session.user.firstName ||
+                lastName !== req.session.user.lastName
+            ) {
                 updatedUserObj["firstName"] = firstName;
                 updatedUserObj["lastName"] = lastName;
             }
 
             if (req.file) {
-                if(!req.session.user.picId.toString().includes("default")) {
+                if (!req.session.user.picId.toString().includes("default")) {
                     await cloudinary.uploader.destroy(req.session.user.picId);
                 }
-                const uploadedPic = await cloudinary.uploader.upload(req.file.path);
+                const uploadedPic = await cloudinary.uploader.upload(
+                    req.file.path
+                );
                 updatedUserObj["pic"] = uploadedPic.url;
                 updatedUserObj["picId"] = uploadedPic.public_id;
                 fs.unlinkSync(req.file.path);

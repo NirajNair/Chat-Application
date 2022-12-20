@@ -53,7 +53,9 @@ export default function Signup() {
         formData.append("email", formValue.email);
         formData.append("password", formValue.password);
         formData.append("confirmPassword", formValue.confirmPassword);
-        formData.append("pic", pic);
+        if(pic) {
+            formData.append("pic", pic);
+        }
         if(!formValue.firstName || !formValue.lastName || !formValue.email || !formValue.password || !formValue.confirmPassword) {
             setErrorMessage("Please fill all required field")
         } else {

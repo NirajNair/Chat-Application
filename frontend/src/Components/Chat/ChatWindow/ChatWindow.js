@@ -46,7 +46,7 @@ export default function ChatWindow(props) {
         // getAllChatMessages();
         // setAllChatMessagesCopy(allChatMessages.reverse());
         selectedChatCompare = selectedChat;
-        socket = io(process.env.REACT_APP_URL);
+        socket = io(API_URL);
         socket.emit("setup", user);
         socket.on("connection", () => setSocketConnected(true));
     }, []);
@@ -101,8 +101,10 @@ export default function ChatWindow(props) {
                 .then((res) => {
                     messageRef.current.value = "";
                     allChatMessages.unshift(res.data);
+                    console.log("message sent client");
                     socket.emit("new message", res.data);
                     updateChatList(res.data);
+
                 });
         }
         setIsLoading(false);
@@ -170,6 +172,7 @@ export default function ChatWindow(props) {
             }
         }
         socket.on("message recieved", (newMessage) => {
+            console.log("message recieved client")
             if (
                 !selectedChatCompare ||
                 selectedChatCompare._id !== newMessage.chat._id
