@@ -1,7 +1,7 @@
 version: "3"
 services:
   react:
-    image: chatapp-frontend-image
+    image: dexter02/chatapp-frontend-image
     stdin_open: true
     ports:
       - "3000:3000"
@@ -11,7 +11,7 @@ services:
       - server
     
   server:
-    image: chatapp-server-image
+    image: dexter02/chatapp-server-image
     ports:
       - "5000:5000"
     networks:
