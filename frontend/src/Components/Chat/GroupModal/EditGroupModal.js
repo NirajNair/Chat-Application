@@ -24,10 +24,15 @@ export default function EditGroupModal(props) {
         setSelectedChat,
     } = UserState();
 
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
+    
     async function getFriendList() {
         await axios
             .get(
-                `${process.env.REACT_APP_URL}/api/chat/friendList`,
+                `${API_URL}/api/chat/friendList`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
@@ -125,7 +130,7 @@ export default function EditGroupModal(props) {
         props.handleShowEditGroupModal(event);
         await axios
             .post(
-                `${process.env.REACT_APP_URL}/api/chat/deletegroup`,
+                `${API_URL}/api/chat/deletegroup`,
                 { chat },
                 { withCredentials: true },
                 {
@@ -152,7 +157,7 @@ export default function EditGroupModal(props) {
         userDetail["userId"] = user._id;
         await axios
             .post(
-                `${process.env.REACT_APP_URL}/api/chat/leavegroup`,
+                `${API_URL}/api/chat/leavegroup`,
                 { userDetail },
                 { withCredentials: true },
                 {
@@ -189,7 +194,7 @@ export default function EditGroupModal(props) {
             group["users"] = userIdList;
             await axios
             .post(
-                `${process.env.REACT_APP_URL}/api/chat/updategroup`,
+                `${API_URL}/api/chat/updategroup`,
                 { group },
                 { withCredentials: true },
                 {

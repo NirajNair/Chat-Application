@@ -22,6 +22,11 @@ export default function Chat() {
     const [isLoading, setIsLoading] = useState(false);
     const [width, setWidth] = useState(window.innerWidth);
 
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
+
     useEffect(() => {
         function handleResize() {
             setWidth(window.innerWidth);
@@ -63,7 +68,7 @@ export default function Chat() {
     async function getFriendList() {
         await axios
             .get(
-                `${process.env.REACT_APP_URL}/api/chat/friendList`,
+                `${API_URL}/api/chat/friendList`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
@@ -101,7 +106,7 @@ export default function Chat() {
             event.preventDefault();
             await axios
                 .post(
-                    `${process.env.REACT_APP_URL}/api/chat/addfriend`,
+                    `${API_URL}/api/chat/addfriend`,
                     { email: userEmail },
                     { withCredentials: true },
                     {

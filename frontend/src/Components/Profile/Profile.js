@@ -27,6 +27,11 @@ export default function Profile() {
     });
 
     const [pic, setPic] = useState();
+
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
     
     function handlePicUpload(event) {
         setPic(event);
@@ -74,7 +79,7 @@ export default function Profile() {
             if(pic || user.firstName !== formValue.firstName || user.lastName !== formValue.lastName) {
                 await axios
                     .post(
-                        `${process.env.REACT_APP_URL}/api/user/updateuser`,
+                        `${API_URL}/api/user/updateuser`,
                         formData,
                         { withCredentials: true },
                         {
@@ -102,7 +107,7 @@ export default function Profile() {
         try {
             await axios
                 .post(
-                    "http://localhost:5000/api/user/changepassword",
+                    `${API_URL}/api/user/changepassword`,
                     formData,
                     { withCredentials: true },
                     {

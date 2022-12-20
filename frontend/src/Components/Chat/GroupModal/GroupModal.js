@@ -17,6 +17,11 @@ export default function GroupModal(props) {
 
     const [pic, setPic] = useState();
 
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
+
     function handlePicUpload(event) {
         setPic(event);
     }
@@ -24,7 +29,7 @@ export default function GroupModal(props) {
     async function getFriendList() {
         await axios
             .get(
-                `${process.env.REACT_APP_URL}/api/chat/friendList`,
+                `${API_URL}/api/chat/friendList`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
@@ -105,7 +110,7 @@ export default function GroupModal(props) {
             }
             await axios
             .post(
-                `${process.env.REACT_APP_URL}/api/chat/creategroup`,
+                `${API_URL}/api/chat/creategroup`,
                     group,
                     { withCredentials: true },
                     {
