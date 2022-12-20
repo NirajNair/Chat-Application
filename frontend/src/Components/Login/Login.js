@@ -19,7 +19,10 @@ export default function Login() {
 
     const { user, setUser } = UserState();
 
-    
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
 
     function toggleShowPass(event) {
         setShowPass(!showPass);
@@ -34,9 +37,9 @@ export default function Login() {
         if (formValue.email && formValue.password) {
             try {
                 event.preventDefault();
-             await axios
+                await axios
                     .post(
-                        `${process.env.REACT_APP_URL}/api/user/login`,
+                        `${API_URL}/api/user/login`,
                         { formValue },
                         { withCredentials: true },
                         {
@@ -45,7 +48,6 @@ export default function Login() {
                     )
                     .then((res) => {
                         setErrorMessage(res.data.message);
-                        console.log("loggedIn");
                         setUser(res.data.user);
                         navigate("/chat");
                     });
@@ -152,6 +154,5 @@ export default function Login() {
                 </div>
             </div>
         </div>
-        
     );
 }

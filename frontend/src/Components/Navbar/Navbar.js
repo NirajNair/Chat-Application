@@ -14,12 +14,17 @@ export default function Navbar(props) {
 
     const {setChatList} = UserState();
 
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
+
     async function handleLogout() {
         try {
             setUserEmail("");
             await axios
                 .get(
-                    `${process.env.REACT_APP_URL}/api/user/logout`,
+                    `${API_URL}/api/user/logout`,
                     { withCredentials: true },
                     {
                         "Content-type": "application/json",

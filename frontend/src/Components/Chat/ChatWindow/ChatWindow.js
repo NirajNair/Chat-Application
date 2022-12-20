@@ -27,6 +27,11 @@ export default function ChatWindow(props) {
 
     const messageRef = useRef(null);
 
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
+
     const {
         user,
         selectedChat,
@@ -86,7 +91,7 @@ export default function ChatWindow(props) {
             };
             await axios
                 .post(
-                    "http://localhost:5000/api/message/send/",
+                    `${API_URL}/api/message/send/`,
                     { messageBody: messageBody },
                     { withCredentials: true },
                     {
@@ -112,7 +117,7 @@ export default function ChatWindow(props) {
         event.preventDefault();
         await axios
             .get(
-                `http://localhost:5000/api/message/deletechat/${selectedChat._id.toString()}`,
+                `${API_URL}/api/message/deletechat/${selectedChat._id.toString()}`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
@@ -135,14 +140,14 @@ export default function ChatWindow(props) {
         if (selectedChat) {
             await axios
                 .get(
-                    `http://localhost:5000/api/message/${selectedChat._id}`,
+                    `${API_URL}/api/message/${selectedChat._id}`,
                     { withCredentials: true },
                     {
                         "Content-type": "application/json",
                     }
                 )
                 .then((res) => {
-                    setChatMessages(res.data.reverse())
+                    setChatMessages(res.data.reverse());
                     setAllChatMessages(res.data.reverse());
                     console.log(res.data.reverse());
                 })
@@ -154,12 +159,11 @@ export default function ChatWindow(props) {
         setIsLoading(false);
     }
 
-    
     useEffect(() => {
         function addMessage(newMessage) {
-            if (allChatMessages[0] &&
-                newMessage._id.toString() !==
-                allChatMessages[0]._id.toString()
+            if (
+                allChatMessages[0] &&
+                newMessage._id.toString() !== allChatMessages[0]._id.toString()
             ) {
                 allChatMessages.unshift(newMessage);
                 updateChatList(newMessage);
@@ -175,7 +179,6 @@ export default function ChatWindow(props) {
                 addMessage(newMessage);
             }
         });
-
     });
 
     return (

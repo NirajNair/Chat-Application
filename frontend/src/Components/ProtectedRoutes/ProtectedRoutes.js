@@ -7,12 +7,17 @@ export default function ProtectedRoutes() {
     const { user, setUser } = UserState();
     const [isLoading, setIsLoading] = useState(true);
 
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
+
     useLayoutEffect(() => {
 
         async function getUser() {
             await axios
                 .get(
-                    `${process.env.REACT_APP_URL}/api/user/`,
+                    `${API_URL}/api/user/`,
                     { withCredentials: true },
                     {
                         "Content-type": "application/json",

@@ -11,14 +11,21 @@ export default function ChatsList(props) {
     const [search, setSearch] = useState("");
     const [timer, setTimer] = useState(null);
 
-    const { user, chatList, setChatList, setSelectedChat } =
-        UserState();
+    const { user, chatList, setChatList, setSelectedChat } = UserState();
+
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
 
     async function getChatList() {
         try {
-            const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/chat`, {
-                withCredentials: true,
-            });
+            const { data } = await axios.get(
+                `${API_URL}/api/chat`,
+                {
+                    withCredentials: true,
+                }
+            );
             setChatList(await data);
             setSearchList(await data);
         } catch (err) {
@@ -54,7 +61,7 @@ export default function ChatsList(props) {
                 setSearchList(matches);
             }, 100);
             setTimer(newTimer);
-         }
+        }
     }
 
     function handleClearSearch(event) {

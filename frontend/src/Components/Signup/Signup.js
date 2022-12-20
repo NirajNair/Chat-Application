@@ -19,6 +19,11 @@ export default function Signup() {
     });
     const [pic, setPic] = useState();
 
+    const API_URL =
+        process.env.NODE_ENV === "development"
+            ? process.env.REACT_APP_DEV_URL
+            : process.env.REACT_APP_PROD_URL;
+
     function handleFormChange(event) {
         event.preventDefault();
         setFormValue({ ...formValue, [event.target.name]: event.target.value });
@@ -55,7 +60,7 @@ export default function Signup() {
             try {
                 await axios
                     .post(
-                        `${process.env.REACT_APP_URL}/api/user/signup`,
+                        `${API_URL}/api/user/signup`,
                         formData ,
                         { withCredentials: true },
                         {   
