@@ -34,7 +34,6 @@ export default function Login() {
         if (formValue.email && formValue.password) {
             try {
                 event.preventDefault();
-                formValue["remember"] = remember;
              await axios
                     .post(
                         `${process.env.REACT_APP_URL}/api/user/login`,
@@ -46,8 +45,10 @@ export default function Login() {
                     )
                     .then((res) => {
                         setErrorMessage(res.data.message);
+                        console.log("loggedIn");
+                        setUser(res.data.user);
+                        navigate("/chat");
                     });
-                navigate("/chat");
             } catch (error) {
                 if (
                     error.response &&
