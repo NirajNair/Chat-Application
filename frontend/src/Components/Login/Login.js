@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { Link } from "react-router-dom";
@@ -17,7 +17,9 @@ export default function Login() {
         password: "",
     });
 
-    const { setUser } = UserState();
+    const { user, setUser } = UserState();
+
+    
 
     function toggleShowPass(event) {
         setShowPass(!showPass);
@@ -33,8 +35,7 @@ export default function Login() {
             try {
                 event.preventDefault();
                 formValue["remember"] = remember;
-                console.log(formValue);
-                await axios
+             await axios
                     .post(
                         `${process.env.REACT_APP_URL}/api/user/login`,
                         { formValue },
@@ -44,8 +45,6 @@ export default function Login() {
                         }
                     )
                     .then((res) => {
-                        console.log(res.data.user);
-                        setUser(res.data.user);
                         setErrorMessage(res.data.message);
                     });
                 navigate("/chat");

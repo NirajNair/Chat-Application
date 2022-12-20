@@ -15,12 +15,10 @@ let encryptPassword = (password, key) => {
         .createHmac("sha256", key)
         .update(password)
         .digest("hex");
-    // console.log("hash: "+ hashPassword);
     return hashPassword;
 };
 
 // save user to database
-
 async function addUserToDB(req, res, newUserObj) {
     const newUser = User(newUserObj);
     await newUser
@@ -146,8 +144,6 @@ userRouter.post("/login", async (req, res) => {
 
 // logs out the user
 userRouter.get("/logout", authenticate, (req, res) => {
-    // console.log("cookie session id: ", req.cookies['_sessionId'])
-    // console.log("redis session id: ",req.sessionID);
     req.session.destroy((err) => {
         if (err) {
             console.log(err);
@@ -174,30 +170,34 @@ userRouter.post(
     upload.single("pic"),
     async (req, res) => {
         try {
-            const { firstName, lastName, pic, picId } = req.body;
+            const { firstName, lastName} = req.body;
             let updatedUserObj = {};
-            updatedUserObj["firstName"] = firstName;
-            updatedUserObj["lastName"] = lastName;
-            updatedUserObj["pic"] = pic;
-            updatedUserObj["picId"] = picId;
+            if(firstName !== req.session.user.firstName || lastName !== req.session.user.lastName) {
+                updatedUserObj["firstName"] = firstName;
+                updatedUserObj["lastName"] = lastName;
+            }
 
             if (req.file) {
-                await cloudinary.uploader.destroy(req.session.user.picId);
-                await cloudinary.uploader.upload(req.file.path);
+                if(!req.session.user.picId.toString().includes("default")) {
+                    await cloudinary.uploader.destroy(req.session.user.picId);
+                }
+                const uploadedPic = await cloudinary.uploader.upload(req.file.path);
                 updatedUserObj["pic"] = uploadedPic.url;
                 updatedUserObj["picId"] = uploadedPic.public_id;
                 fs.unlinkSync(req.file.path);
             }
             if (updatedUserObj) {
-                const updatedUser = await User.findOneAndUpdate(
+                await User.findOneAndUpdate(
                     { _id: req.session.user._id },
                     { $set: updatedUserObj }
-                ).select("-password");
-                if (!updatedUser) {
+                );
+                const user = await User.findOne({ _id: req.session.user._id });
+                if (!user) {
                     res.status(404).send("User not found");
                 } else {
-                    req.session.user = updatedUser;
-                    res.status(200).json({ user: updatedUser });
+                    console.log(user);
+                    req.session.user = user;
+                    res.status(200).json({ user: user });
                 }
             }
         } catch (err) {

@@ -51,7 +51,6 @@ export default function ChatWindow(props) {
             console.log("req gets called");
             getAllChatMessages();
         }
-        console.log(allChatMessages.reverse());
     }, []);
 
     function handleChange(event) {
@@ -78,8 +77,6 @@ export default function ChatWindow(props) {
 
     async function handleSendMessage(event) {
         event.preventDefault();
-        // setMessage(messageRef.current.value);
-        // console.log(messageRef.current.value)
         setIsLoading(true);
         let message = messageRef.current.value;
         if (message !== "") {
@@ -89,7 +86,7 @@ export default function ChatWindow(props) {
             };
             await axios
                 .post(
-                    `${process.env.REACT_APP_URL}/api/message/send/`,
+                    "http://localhost:5000/api/message/send/",
                     { messageBody: messageBody },
                     { withCredentials: true },
                     {
@@ -97,12 +94,10 @@ export default function ChatWindow(props) {
                     }
                 )
                 .then((res) => {
-                    console.log(res.data);
                     messageRef.current.value = "";
                     allChatMessages.unshift(res.data);
                     socket.emit("new message", res.data);
                     updateChatList(res.data);
-                    console.log(chatList);
                 });
         }
         setIsLoading(false);
@@ -115,24 +110,17 @@ export default function ChatWindow(props) {
 
     async function handleDeleteChat(event) {
         event.preventDefault();
-        // setIsMessageLoading(true);
-        console.log("entered");
         await axios
             .get(
-                `${
-                    process.env.REACT_APP_URL
-                }/api/message/deletechat/${selectedChat._id.toString()}`,
+                `http://localhost:5000/api/message/deletechat/${selectedChat._id.toString()}`,
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
                 }
             )
             .then((res) => {
-                console.log(res);
                 if (res.status === 200) {
-                    console.log("chat deleted");
                     setAllChatMessages([]);
-                    // updateLastMessage({});
                     updateLastMessage({});
                 }
             })
@@ -147,16 +135,16 @@ export default function ChatWindow(props) {
         if (selectedChat) {
             await axios
                 .get(
-                    `${process.env.REACT_APP_URL}/api/message/${selectedChat._id}`,
+                    `http://localhost:5000/api/message/${selectedChat._id}`,
                     { withCredentials: true },
                     {
                         "Content-type": "application/json",
                     }
                 )
                 .then((res) => {
-                    console.log(res.data.reverse());
-                    setChatMessages(res.data.reverse());
+                    setChatMessages(res.data.reverse())
                     setAllChatMessages(res.data.reverse());
+                    console.log(res.data.reverse());
                 })
                 .catch((err) => {
                     console.log(err);
@@ -166,9 +154,17 @@ export default function ChatWindow(props) {
         setIsLoading(false);
     }
 
+    
     useEffect(() => {
-        console.log("message recieved", allChatMessages);
-
+        function addMessage(newMessage) {
+            if (allChatMessages[0] &&
+                newMessage._id.toString() !==
+                allChatMessages[0]._id.toString()
+            ) {
+                allChatMessages.unshift(newMessage);
+                updateChatList(newMessage);
+            }
+        }
         socket.on("message recieved", (newMessage) => {
             if (
                 !selectedChatCompare ||
@@ -176,19 +172,10 @@ export default function ChatWindow(props) {
             ) {
                 //give notification
             } else {
-                // console.log(allChatMessages[0], newMessage);
-                if (
-                    newMessage._id.toString() !==
-                    allChatMessages[0]._id.toString()
-                ) {
-                    console.log("message added ");
-                    allChatMessages.unshift(newMessage);
-                    updateChatList(newMessage);
-                    // updateLastMessage(newMessage);
-                    console.log(allChatMessages.length);
-                }
+                addMessage(newMessage);
             }
         });
+
     });
 
     return (
@@ -259,7 +246,6 @@ export default function ChatWindow(props) {
             <div className="flex flex-col-reverse relative overflow-y-scroll scrollbar-hide flex-grow h-96">
                 {allChatMessages &&
                     allChatMessages.map((message, index, arr) => {
-                        console.log(index);
                         let [year, month, day] = message.createdAt
                             .toString()
                             .split("T")[0]
@@ -273,7 +259,8 @@ export default function ChatWindow(props) {
                                         </span>
                                     ) : (
                                         <span>
-                                            {index + 1 < allChatMessages.length-1 &&
+                                            {index + 1 <
+                                                allChatMessages.length - 1 &&
                                                 arr[index + 1].createdAt
                                                     .toString()
                                                     .split("T")[0] !==
@@ -332,13 +319,14 @@ export default function ChatWindow(props) {
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className={(message.sender._id ===
-                                                    user._id
-                                                        ? ""
-                                                        : "w-fit")}>
-                                            <div
-                                                className="text-xs font-light flex justify-end px-2"
-                                            >
+                                        <div
+                                            className={
+                                                message.sender._id === user._id
+                                                    ? ""
+                                                    : "w-fit"
+                                            }
+                                        >
+                                            <div className="text-xs font-light flex justify-end px-2">
                                                 <Time
                                                     date={message.createdAt}
                                                 />

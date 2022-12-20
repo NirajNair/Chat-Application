@@ -19,7 +19,6 @@ export default function ChatsList(props) {
             const { data } = await axios.get(`${process.env.REACT_APP_URL}/api/chat`, {
                 withCredentials: true,
             });
-            console.log(data);
             setChatList(await data);
             setSearchList(await data);
         } catch (err) {
@@ -52,11 +51,9 @@ export default function ChatsList(props) {
                     }
                     return regexExp.test(chat.chatName.toLowerCase());
                 });
-                // console.log(matches);
                 setSearchList(matches);
             }, 100);
             setTimer(newTimer);
-            // console.log(search);
          }
     }
 
@@ -82,8 +79,7 @@ export default function ChatsList(props) {
             getChatList();
         }
         setSearchList(chatList);
-        // console.log("chatlist");
-    }, []);
+    }, [chatList]);
 
     return (
         <div>

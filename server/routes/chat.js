@@ -163,23 +163,23 @@ chatRouter.post(
             };
             if (req.file) {
                 await cloudinary.uploader
-                .upload(req.file.path)
-                .then((result) => {
-                    console.log(result);
-                    newGroupChatData["groupPic"] = result.url;
-                    newGroupChatData["groupPicId"] = result.public_id;
-                    fs.unlinkSync(req.file.path);
-                });
-                const newGroupChat = await Chat.create(newGroupChatData);
-
-                const populatedNewGroupChat = await Chat.findOne({
-                    _id: newGroupChat._id,
-                })
-                    .populate("users", "-password")
-                    .populate("groupAdmin", "-password")
-                    .populate("lastMessage");
-                res.status(200).send(populatedNewGroupChat);
+                    .upload(req.file.path)
+                    .then((result) => {
+                        console.log(result);
+                        newGroupChatData["groupPic"] = result.url;
+                        newGroupChatData["groupPicId"] = result.public_id;
+                        fs.unlinkSync(req.file.path);
+                    });
             }
+            const newGroupChat = await Chat.create(newGroupChatData);
+
+            const populatedNewGroupChat = await Chat.findOne({
+                _id: newGroupChat._id,
+            })
+                .populate("users", "-password")
+                .populate("groupAdmin", "-password")
+                .populate("lastMessage");
+            res.status(200).send(populatedNewGroupChat);
         } catch (err) {
             console.log(err);
             res.status(401).send("Could not add friend");
@@ -191,7 +191,7 @@ chatRouter.post(
 chatRouter.post("/updategroup", authenticate, async (req, res) => {
     const { chatId, chatName, users } = req.body.group;
 
-    const updatedChat = await Chat.updateOne(
+    await Chat.findOneAndUpdate(
         { _id: chatId },
         {
             $set: {
@@ -200,6 +200,10 @@ chatRouter.post("/updategroup", authenticate, async (req, res) => {
             },
         }
     );
+    const updatedChat = await Chat.findOne({ _id: chatId })
+        .populate("users", "-password")
+        .populate("groupAdmin", "-password")
+        .populate("lastMessage");
     if (!updatedChat) {
         res.status(404).send("Chat not found");
     } else {
@@ -221,13 +225,13 @@ chatRouter.post("/leavegroup", authenticate, async (req, res) => {
     if (!removedUser) {
         res.status(404).send("Chat not found");
     } else {
-        res.status(200).send("User removed from group");
+        res.status(200).send("User left the group");
     }
 });
 
 chatRouter.post("/deletegroup/", authenticate, async (req, res) => {
     try {
-        const {chat} = req.body;
+        const { chat } = req.body;
         await cloudinary.uploader.destroy(chat.groupPicId);
         await Chat.deleteOne({ _id: chat._id });
         await Message.deleteMany({ chat: chat._id });

@@ -91,7 +91,7 @@ export default function Chat() {
             setSearchResult(matches);
         }
     }
-
+  
     useEffect(() => {
         searchUsers();
     }, [searchFriend]);
@@ -99,7 +99,6 @@ export default function Chat() {
     async function handleAddUser(event, userEmail) {
         try {
             event.preventDefault();
-            console.log(userEmail);
             await axios
                 .post(
                     `${process.env.REACT_APP_URL}/api/chat/addfriend`,
@@ -122,7 +121,6 @@ export default function Chat() {
                     getFriendList();
                 })
                 .catch((error) => {
-                    // console.log(error.response.data.msg);
                     toast.dismiss();
                     toast.error(error.response.data.msg, {
                         duration: 3000,
@@ -140,8 +138,6 @@ export default function Chat() {
 
     useEffect(() => {
         setIsLoading(true);
-        // getUsers(searchFriend);
-        console.log(user);
         getFriendList();
         setIsLoading(false);
     }, []);
@@ -161,7 +157,6 @@ export default function Chat() {
             <div className="h-full flex items-center">
                 {!isLoading &&
                     (width < 950 ? (
-                        // console.log("hellow" )
                         selectedChat ? (
                             <div className="w-full h-full bg-white">
                                 <div className="h-full relative">

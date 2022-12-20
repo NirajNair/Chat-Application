@@ -57,11 +57,9 @@ export default function EditGroupModal(props) {
                     ({ _id }) => friend._id.toString() === _id.toString()
                 )
         );
-        console.log(newMemberList);
         setGroupMembers(selectedChat.users);
         setGroupName(selectedChat.chatName);
         setNewMembers(newMemberList);
-        console.log(newMembers);
     }, []);
 
     function handleChange(event) {
@@ -96,8 +94,12 @@ export default function EditGroupModal(props) {
 
     function handleSelectFriend(event, key) {
         event.preventDefault();
-        let newGroupMember = newMembers.filter((friend) => friend._id === key);
-        let newMemberList = newMembers.filter((friend) => friend._id !== key);
+        let newGroupMember = newMembers.filter(
+            (friend) => friend._id.toString() === key.toString()
+        );
+        let newMemberList = newMembers.filter(
+            (friend) => friend._id.toString() !== key.toString()
+        );
         groupMembers.push(newGroupMember[0]);
         setNewMembers(newMemberList);
         setGroupMembers(groupMembers);
@@ -106,23 +108,25 @@ export default function EditGroupModal(props) {
     function handleDeselectFriend(event, key) {
         event.preventDefault();
         let newGroupMembers = groupMembers.filter(
-            (friend) => friend._id !== key
+            (friend) => friend._id.toString() !== key.toString()
         );
-        let newMember = groupMembers.filter((friend) => friend._id === key);
-        let newMemberList = newMembers;
-        newMemberList.push(newMember[0]);
-        console.log(newMemberList);
+        let newMember = groupMembers.filter(
+            (friend) => friend._id.toString() === key.toString()
+        );
+        newMembers.push(newMember[0]);
+        let arrOfNewMembers = newMembers;
+        setNewMembers(arrOfNewMembers);
         setGroupMembers(newGroupMembers);
-        setNewMembers(newMemberList);
     }
 
     async function handleDeleteGroup(event) {
         event.preventDefault();
         let chat = selectedChat;
+        props.handleShowEditGroupModal(event);
         await axios
             .post(
                 `${process.env.REACT_APP_URL}/api/chat/deletegroup`,
-                {chat},
+                { chat },
                 { withCredentials: true },
                 {
                     "Content-type": "application/json",
@@ -130,17 +134,16 @@ export default function EditGroupModal(props) {
             )
             .then((res) => {
                 if (res.status === 200) {
-                    console.log("group deleted");
-                    let idx = chatList.indexOf(selectedChat);
-                    let updatedChatList = chatList.splice(idx, 1);
-                    setChatList([...updatedChatList]);
+                    let newChatList = chatList.filter(
+                        (chat) =>
+                            chat._id.toString() !== selectedChat._id.toString()
+                    );
+                    setChatList(newChatList);
                     setSelectedChat();
+
                 }
             })
-            .catch((err) => {
-                console.log(err);
-            });
-        props.handleShowEditGroupModal(event);
+            .catch((err) => {});
     }
 
     async function handleLeaveGroup(event) {
@@ -157,12 +160,13 @@ export default function EditGroupModal(props) {
                 }
             )
             .then((res) => {
-                console.log(res.data);
                 let newChatList = chatList.filter(
                     (chat) =>
                         chat._id.toString() !== selectedChat._id.toString()
                 );
+                console.log(newChatList)
                 setChatList(newChatList);
+                setSelectedChat();
                 props.handleShowEditGroupModal(event);
             })
             .catch((err) => {
@@ -184,19 +188,20 @@ export default function EditGroupModal(props) {
             group["chatName"] = groupName;
             group["users"] = userIdList;
             await axios
-                .post(
-                    `${process.env.REACT_APP_URL}/api/chat/updategroup`,
-                    { group },
-                    { withCredentials: true },
-                    {
-                        "Content-type": "application/json",
-                    }
+            .post(
+                `${process.env.REACT_APP_URL}/api/chat/updategroup`,
+                { group },
+                { withCredentials: true },
+                {
+                    "Content-type": "application/json",
+                }
                 )
                 .then((res) => {
-                    console.log(res.data);
                     for (var i = 0; i < chatList.length; i++) {
-                        if (chatList[i]._id === res.data._id) {
+                        if (chatList[i]._id.toString() === res.data._id.toString()) {
                             chatList[i] = res.data;
+                            setChatList(chatList);
+                            break;
                         }
                     }
                     props.handleShowEditGroupModal(event);

@@ -1,32 +1,39 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Outlet, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { UserState } from "../../Contexts/UserContext";
 import axios from "axios";
 
 export default function ProtectedRoutes() {
     const { user, setUser } = UserState();
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    async function getUser() {
-        await axios.get(
-            `${process.env.REACT_APP_URL}/api/user/`,
-            { withCredentials: true },
-            {
-                "Content-type": "application/json",
-            }
-        ).then((res) => {
-            setUser(res.data.user);
-            
-        });
-    }
-
-    useLayoutEffect(() => {
-        console.log("loading")
-        setIsLoading(true);
-        if(!user) {
+    useEffect(() => {
+        async function getUser() {
+            await axios
+                .get(
+                    `${process.env.REACT_APP_URL}/api/user/`,
+                    { withCredentials: true },
+                    {
+                        "Content-type": "application/json",
+                    }
+                )
+                .then((res) => {
+                    setUser(res.data.user);
+                });
+        }
+        if (!user) {
             getUser();
         }
-        setIsLoading(false);
-    }, [user])
+        if (user) {
+            setIsLoading(false);
+        }
+    }, [user]);
 
-    return  isLoading ? <div>Loading</div> : ( user ? <Outlet /> : <Navigate to="/login" />) }
+    return isLoading ? (
+        <div>Loading</div>
+    ) : user ? (
+        <Outlet />
+    ) : (
+        <Navigate to="/login" />
+    );
+}

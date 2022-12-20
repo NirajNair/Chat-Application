@@ -25,7 +25,6 @@ export default function Signup() {
     }
 
     function handlePicUpload(event) {
-        console.log(event);
         setPic(event);
 
     }
@@ -53,9 +52,6 @@ export default function Signup() {
         if(!formValue.firstName || !formValue.lastName || !formValue.email || !formValue.password || !formValue.confirmPassword) {
             setErrorMessage("Please fill all required field")
         } else {
-            for (var key of formData.entries()) {
-                console.log(key[0] + ', ' + key[1]);
-            }
             try {
                 await axios
                     .post(
@@ -67,12 +63,10 @@ export default function Signup() {
                         }
                     )
                     .then((res) => {
-                        // console.log(res);
                         setErrorMessage(res.message);
                     });
                 navigate("/login");
             } catch (error) {
-                // console.log(error);
                 if (
                     error.response &&
                     error.response.status >= 400 &&
@@ -83,10 +77,6 @@ export default function Signup() {
             }
         }
     }
-
-    // useEffect(() => {
-
-    // }, [errorMessage]);
 
     return (
         <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-screen">
