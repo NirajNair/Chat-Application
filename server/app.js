@@ -101,6 +101,12 @@ app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/message", messageRoutes);
 
+app.use(express.static(__dirname));
+
+app.get("/*", function(req, res) {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
 httpServer.listen(port, () => console.log(`App is listening to port ${port}`));
 
 
